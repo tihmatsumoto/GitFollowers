@@ -1,5 +1,5 @@
 //
-//  ErrorMessage.swift
+//  GFError.swift
 //  GitFollowers
 //
 //  Created by Tiemi Matsumoto on 26/08/2024.
