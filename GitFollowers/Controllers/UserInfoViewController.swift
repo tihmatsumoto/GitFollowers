@@ -7,15 +7,22 @@
 
 import UIKit
 
+protocol UserInfoViewControllerDelegate: AnyObject {
+    func didTapGitHubProfile(for user: User)
+    func didTapGetFollowers(for user: User)
+}
+
 class UserInfoViewController: UIViewController {
     
     let headerView = UIView()
     let itemViewOne = UIView()
     let itemViewTwo = UIView()
+    let datelabel = GFBodyLabel(textAlignment: .center)
     var itemViews: [UIView] = []
     
     var username: String!
-
+    weak var delegate: FollowerListViewControllerDelegate!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
@@ -36,7 +43,7 @@ class UserInfoViewController: UIViewController {
             switch result {
             case .success(let user):
                 DispatchQueue.main.async {
-                    self.add(childVC: GFUserInfoHeaderViewController(user: user), to: self.headerView)
+                    self.configureUIElements(with: user)
                 }
             case .failure(let error):
                 self.presentGFAlertOnMainThread(title: "Something went wrong", message: error.rawValue, buttonTitle: "Ok")
@@ -45,15 +52,28 @@ class UserInfoViewController: UIViewController {
         }
     }
     
+    func configureUIElements(with user: User) {
+        let repoItemVC = GFRepoItemViewController(user: user)
+        repoItemVC.delegate = self
+        
+        let followerItemVC = GFFollowerItemViewController(user: user)
+        followerItemVC.delegate = self
+        
+        self.add(childVC: GFUserInfoHeaderViewController(user: user), to: self.headerView)
+        self.add(childVC: repoItemVC, to: self.itemViewOne)
+        self.add(childVC: followerItemVC, to: self.itemViewTwo)
+        self.datelabel.text = "GitHub since \(user.createdAt.convertToDisplayFormat())"
+    }
+    
     func layoutUI() {
         let padding: CGFloat = 20
         let itemHeight: CGFloat = 140
-        itemViews = [headerView, itemViewOne, itemViewTwo]
+        itemViews = [headerView, itemViewOne, itemViewTwo, datelabel]
         
         for itemView in itemViews {
             view.addSubview(itemView)
             itemView.translatesAutoresizingMaskIntoConstraints = false
-           
+            
             NSLayoutConstraint.activate([
                 itemView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
                 itemView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
@@ -69,6 +89,9 @@ class UserInfoViewController: UIViewController {
             
             itemViewTwo.topAnchor.constraint(equalTo: itemViewOne.bottomAnchor, constant: padding),
             itemViewTwo.heightAnchor.constraint(equalToConstant: itemHeight),
+            
+            datelabel.topAnchor.constraint(equalTo: itemViewTwo.bottomAnchor, constant: padding),
+            datelabel.heightAnchor.constraint(equalToConstant: 18)
         ])
     }
     
@@ -82,5 +105,25 @@ class UserInfoViewController: UIViewController {
     @objc func dismissVC() {
         dismiss(animated: true)
     }
+}
 
+extension UserInfoViewController: UserInfoViewControllerDelegate {
+    func didTapGitHubProfile(for user: User) {
+        guard let url = URL(string: user.htmlUrl) else {
+            presentGFAlertOnMainThread(title: "Invalid URL", message: "The url attached to this user is invalid.", buttonTitle: "Ok")
+            return
+        }
+        
+        presentSafariVC(with: url)
+    }
+    
+    func didTapGetFollowers(for user: User) {
+        guard user.followers != 0 else {
+            presentGFAlertOnMainThread(title: "No followers", message: "This user has no followers.", buttonTitle: "Ok")
+            return
+        }
+        
+        delegate.didRequestFollowers(for: user.login)
+        dismissVC()
+    }
 }
