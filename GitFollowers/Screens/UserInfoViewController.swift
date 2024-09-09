@@ -7,11 +7,6 @@
 
 import UIKit
 
-protocol UserInfoViewControllerDelegate: AnyObject {
-    func didTapGitHubProfile(for user: User)
-    func didTapGetFollowers(for user: User)
-}
-
 class UserInfoViewController: UIViewController {
     
     let headerView = UIView()
@@ -82,7 +77,7 @@ class UserInfoViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             headerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            headerView.heightAnchor.constraint(equalToConstant: 180),
+            headerView.heightAnchor.constraint(equalToConstant: 210),
             
             itemViewOne.topAnchor.constraint(equalTo: headerView.bottomAnchor, constant: padding),
             itemViewOne.heightAnchor.constraint(equalToConstant: itemHeight),
@@ -91,7 +86,7 @@ class UserInfoViewController: UIViewController {
             itemViewTwo.heightAnchor.constraint(equalToConstant: itemHeight),
             
             datelabel.topAnchor.constraint(equalTo: itemViewTwo.bottomAnchor, constant: padding),
-            datelabel.heightAnchor.constraint(equalToConstant: 18)
+            datelabel.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
@@ -107,7 +102,7 @@ class UserInfoViewController: UIViewController {
     }
 }
 
-extension UserInfoViewController: UserInfoViewControllerDelegate {
+extension UserInfoViewController: GFRepoItemViewControllerDelegate {
     func didTapGitHubProfile(for user: User) {
         guard let url = URL(string: user.htmlUrl) else {
             presentGFAlertOnMainThread(title: "Invalid URL", message: "The url attached to this user is invalid.", buttonTitle: "Ok")
@@ -116,7 +111,9 @@ extension UserInfoViewController: UserInfoViewControllerDelegate {
         
         presentSafariVC(with: url)
     }
-    
+}
+
+extension UserInfoViewController: GFFollowerItemViewControllerDelegate {
     func didTapGetFollowers(for user: User) {
         guard user.followers != 0 else {
             presentGFAlertOnMainThread(title: "No followers", message: "This user has no followers.", buttonTitle: "Ok")
