@@ -7,6 +7,11 @@
 
 import UIKit
 
+protocol ItemInfoViewControllerDelegate: AnyObject {
+    func didTapGetFollowers(for user: User)
+    func didTapGitHubProfile(for user: User)
+}
+
 class GFItemInfoViewController: UIViewController {
     
     let stackView = UIStackView()
@@ -51,9 +56,7 @@ class GFItemInfoViewController: UIViewController {
         actionButton.addTarget(self, action: #selector(actionButtonTapped), for: .touchUpInside)
     }
     
-    @objc func actionButtonTapped() {
-        
-    }
+    @objc func actionButtonTapped() {}
 
     private func layoutUI() {
         view.addSubviews(stackView, actionButton)

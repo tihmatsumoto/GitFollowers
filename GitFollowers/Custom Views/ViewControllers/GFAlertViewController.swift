@@ -89,5 +89,4 @@ class GFAlertViewController: UIViewController {
     @objc func dismissVC() {
         dismiss(animated: true)
     }
-
 }
