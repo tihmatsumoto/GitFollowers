@@ -81,7 +81,7 @@ class FollowerListViewController: UIViewController {
         
         Task {
             do {
-                let followers = try await NetworkManager.shared.getFollowers(for: username, page: page)
+                let followers = try await NetworkManager.shared.getFollowers(for: username, page: 1)
                 updateUI(with: followers)
                 dismissLoadingView()
             } catch {
@@ -154,10 +154,12 @@ class FollowerListViewController: UIViewController {
             } catch {
                 if let gfError = error as? GFError {
                     presentGFAlert(title: "Something went wrong", message: gfError.rawValue, buttonTitle: "Ok")
+                } else {
+                    presentDefaultError()
                 }
+                
+                dismissLoadingView()
             }
-            
-            dismissLoadingView()
         }
     }
     
@@ -165,8 +167,8 @@ class FollowerListViewController: UIViewController {
         let favorite = Follower(login: user.login, avatarUrl: user.avatarUrl)
         
         PersistenceManager.updateWith(favorite: favorite, actionType: .add) { [weak self] error in
-            guard let self = self else { return }
-            guard let error = error else {
+            guard let self else { return }
+            guard let error else {
                 DispatchQueue.main.async {
                     self.presentGFAlert(title: "Success!", message: "You have successfully favorited this user", buttonTitle: "Ok")
                 }
