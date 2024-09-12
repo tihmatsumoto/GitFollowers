@@ -19,11 +19,12 @@ struct FollowerView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             } placeholder: {
-                Image("avatar-placeholder")
+                Image(.avatarPlaceholder)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             }
-            .clipShape(Circle()) //just to differentiate between UIKit and SwiftUI
+            .clipShape(.rect(cornerRadius: 10))
+//            .clipShape(Circle()) //just to differentiate between UIKit and SwiftUI
             
             Text(follower.login)
                 .bold()
